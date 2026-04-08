@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Hyosung TNC — Global Certification Dashboard</title>
+<style>
+:root {
+  --p:     #2E008B;
+  --p100:  #EDE5FF;
+  --p200:  #CDB8F5;
+  --p400:  #7B4FD0;
+  --p600:  #2E008B;
+  --p800:  #1A0050;
+  --t:     #007B8A;
+  --t100:  #E1F5EE;
+  --t600:  #007B8A;
+  --g100:  #F5F4F9;
+  --g200:  #ECEAF4;
+  --g400:  #9B94B8;
+  --g600:  #5A5375;
+  --grn:   #2A7D4F;
+  --grn100:#E8F5EE;
+  --amb:   #8C5A00;
+  --amb100:#FEF3DC;
+  --red:   #993C1D;
+  --red100:#FAECE7;
+  --qua:   #1565C0;
+  --qua100:#E3F2FD;
+  --soc:   #00695C;
+  --soc100:#E0F2F1;
+  --blu:   #185FA5;
+  --blu100:#E6F1FB;
+  --wh:    #FFFFFF;
+  --bg:    #F7F5FC;
+  --bdr:   rgba(46,0,139,.12);
+  --bdr2:  rgba(46,0,139,.22);
+  --r:     8px;
+  --rl:    12px;
+  --rx:    16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--p800);min-height:100vh;font-size:16px;line-height:1.6}
+
+/* header */
+.hdr{background:var(--p600);padding:0 28px;height:54px;display:flex;align-items:center;justify-content:space-between}
+.hdr-brand{display:flex;align-items:center;gap:14px}
+.hdr-logo{font-size:14px;font-weight:700;color:#fff;letter-spacing:.08em}
+.hdr-divider{width:1px;height:18px;background:rgba(255,255,255,.25)}
+.hdr-title{font-size:13px;color:rgba(255,255,255,.7)}
+.hdr-right{display:flex;align-items:center;gap:12px}
+.hdr-date{font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.04em}
+
+/* lang toggle */
+.lang-tog{display:flex;background:rgba(255,255,255,.12);border-radius:99px;padding:3px;gap:2px}
+.lbtn{font-size:11px;font-weight:600;padding:3px 12px;border-radius:99px;border:none;background:transparent;color:rgba(255,255,255,.55);cursor:pointer;transition:all .15s;letter-spacing:.04em}
+.lbtn.on{background:#fff;color:var(--p600)}
+
+/* main */
+.main{max-width:1080px;margin:0 auto;padding:24px 20px 60px}
+
+/* kpi row */
+.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
+.kpi{background:var(--wh);border:0.5px solid var(--bdr);border-radius:var(--rl);padding:16px 20px;display:flex;align-items:center;gap:14px}
+.kpi-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.kpi-num{font-size:26px;font-weight:700;line-height:1;color:var(--p600)}
+.kpi-lbl{font-size:13px;color:var(--g600);margin-top:2px}
+
+/* filter */
+.frow{display:flex;gap:7px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+.dl-link{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--p600);background:var(--p100);border:0.5px solid var(--p200);border-radius:99px;padding:5px 14px;text-decoration:none;transition:all .13s;white-space:nowrap}
+.dl-link:hover{background:var(--p200);border-color:var(--p400)}
+.fgrp-lbl{font-size:11px;color:var(--g400);margin-right:2px;font-weight:500}
+.fbtn{font-size:14px;font-weight:500;padding:5px 15px;border-radius:99px;border:0.5px solid var(--bdr2);background:var(--wh);color:var(--g600);cursor:pointer;transition:all .13s}
+.fbtn:hover{border-color:var(--p400);color:var(--p600)}
+.fbtn.on{background:var(--p600);border-color:var(--p600);color:#fff}
+
+/* section */
+.sec{margin-bottom:16px}
+.sec.hidden{display:none}
+.sec-lbl{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--g400);margin-bottom:8px;padding-left:1px}
+
+/* tier block */
+.tblk{background:var(--wh);border:0.5px solid var(--bdr);border-radius:var(--rx);padding:16px}
+.thdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:0.5px solid var(--bdr)}
+.tbadge{font-size:10px;font-weight:600;padding:3px 11px;border-radius:99px;letter-spacing:.04em}
+.bc{background:var(--p100);color:var(--p600)}
+.bt{background:var(--t100);color:var(--t600)}
+.tnm{font-size:13px;font-weight:600;color:var(--p800)}
+.tct{margin-left:auto;font-size:11px;color:var(--g400)}
+
+/* cert grid */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:9px}
+.ccard{background:var(--g100);border:0.5px solid var(--bdr);border-radius:var(--r);padding:13px 12px 11px;cursor:pointer;transition:all .13s;position:relative;overflow:hidden}
+.ccard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--acc,var(--bdr));border-radius:var(--r) 0 0 var(--r)}
+.ccard:hover{border-color:var(--bdr2);background:var(--wh);transform:translateY(-1px);box-shadow:0 2px 10px rgba(46,0,139,.08)}
+.ccard.on{border-color:var(--p600);background:var(--p100)}
+.ccard.on::before{background:var(--p600)}
+.ccard.hidden{display:none}
+
+/* cat pill */
+.cpill{position:absolute;top:9px;right:9px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:99px;letter-spacing:.04em}
+.cenv {background:var(--grn100);color:var(--grn)}
+.csaf {background:var(--amb100);color:var(--amb)}
+.cprd {background:var(--p100);color:var(--p600)}
+.csup {background:var(--red100);color:var(--red)}
+.cqua {background:var(--qua100);color:var(--qua)}
+.csoc {background:var(--soc100);color:var(--soc)}
+
+.cbadge{display:inline-block;font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;margin-bottom:8px;letter-spacing:.05em;color:#fff}
+.cnm{font-size:14px;font-weight:600;color:var(--p800);margin-bottom:2px;line-height:1.35}
+.csc{font-size:12px;color:var(--g600);line-height:1.4}
+.cst{margin-top:6px;font-size:12px;color:var(--g400);font-weight:500}
+.cst em{color:var(--p600);font-style:normal;font-weight:600}
+.cdday{margin-top:7px;font-size:12px;font-weight:700;padding:3px 9px;border-radius:4px;display:inline-block;letter-spacing:.03em}
+.cdday-warn{background:var(--amb100);color:var(--amb)}
+.cdday-exp{background:var(--red100);color:var(--red)}
+
+/* matrix site type tag */
+.mtyp{font-size:9px;font-weight:600;padding:1px 6px;border-radius:3px;margin-left:5px;vertical-align:middle;letter-spacing:.03em}
+.mtyp-plant{background:var(--grn100);color:var(--grn)}
+.mtyp-trade{background:var(--blu100);color:var(--blu)}
+.mtyp-hq{background:var(--p100);color:var(--p600)}
+.mtyp-office{background:var(--g200);color:var(--g600)}
+.mtyp-rd{background:var(--amb100);color:var(--amb)}
+
+/* detail panel */
+.detail{border:0.5px solid var(--p400);border-radius:var(--rl);padding:18px 20px;background:var(--p100);margin-top:12px;display:none;animation:fadeup .18s ease}
+.detail.vis{display:block}
+@keyframes fadeup{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.dtitle{font-size:15px;font-weight:600;color:var(--p600);margin-bottom:14px;display:flex;align-items:center;gap:10px;padding:0 0 12px 12px;border-left:3px solid var(--p600);border-bottom:0.5px solid var(--bdr)}
+
+
+
+
+.dcycle{font-size:11px;color:var(--g600);background:var(--wh);padding:2px 10px;border-radius:99px;border:0.5px solid var(--bdr2);font-weight:500}
+.dsite-tbl{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed}
+.dsite-tbl thead tr{border-bottom:0.5px solid var(--bdr2)}
+.dsite-tbl thead th{padding:5px 0;text-align:left;font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--g400)}
+.dsite-tbl thead th:last-child{text-align:left;width:100px}
+.dsite-tbl tbody tr{border-bottom:0.5px solid var(--bdr)}
+.dsite-tbl tbody tr:last-child{border-bottom:none}
+.dsite-tbl tbody td{padding:7px 12px 7px 0;color:var(--p800)}
+.dsite-tbl tbody td:last-child{text-align:left;width:100px;color:var(--g600);font-variant-numeric:tabular-nums;padding:7px 0;font-size:16px}
+.dsite-tbl .exp-warn td:last-child{color:var(--amb);font-weight:600}
+.dsite-tbl .exp-past td:last-child{color:var(--red);font-weight:600}
+
+
+
+
+/* matrix */
+.mx-sec{margin-top:28px}
+.mx-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.mx-ttl{font-size:13px;font-weight:600;color:var(--p800)}
+.mx-hint{font-size:11px;color:var(--g400)}
+.mx-hint b{color:var(--p600);font-weight:600}
+.mx-wrap{background:var(--wh);border:0.5px solid var(--bdr);border-radius:var(--rl);overflow:hidden}
+.mx-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+thead tr{background:var(--p600)}
+thead th{padding:9px 7px;color:rgba(255,255,255,.8);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;transition:all .2s}
+thead th:first-child{text-align:left;padding-left:14px;min-width:130px}
+thead th:nth-child(2){min-width:52px;text-align:center}
+thead th:nth-child(3){min-width:60px}
+thead th.con{color:#fff;background:var(--p400)}
+thead th.coff{opacity:.28}
+tbody tr{border-bottom:0.5px solid var(--bdr)}
+tbody tr:nth-child(even){background:var(--g100)}
+tbody tr:hover{background:var(--p100)}
+tbody td{padding:8px 7px;text-align:center;vertical-align:middle;transition:all .2s}
+tbody td:first-child{text-align:left;padding-left:14px;font-weight:600;color:var(--p800)}
+tbody td:nth-child(2){color:var(--g600);font-size:11px}
+tbody td:nth-child(3){color:var(--g600);font-size:11px}
+tbody td.con{background:rgba(46,0,139,.06)}
+tbody td.coff{opacity:.2}
+.dy{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;font-size:12px;font-weight:700;color:var(--p600)}
+.dn{color:var(--g400);font-size:12px}
+.mx-foot{padding:9px 14px;font-size:11px;color:var(--g400);border-top:0.5px solid var(--bdr);display:flex;gap:16px;flex-wrap:wrap}
+
+
+/* footer */
+.foot{text-align:center;padding:18px;font-size:11px;color:var(--g400);border-top:0.5px solid var(--bdr);margin-top:36px}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-brand">
+    <span class="hdr-logo">HYOSUNG TNC</span>
+    <div class="hdr-divider"></div>
+    <span class="hdr-title" data-ko="인증 현황 대시보드" data-en="Global Certification Dashboard">인증 현황 대시보드</span>
+  </div>
+  <div class="hdr-right">
+    <span class="hdr-date">2026</span>
+    <div class="lang-tog">
+      <button class="lbtn on" id="bko" onclick="setLang('ko')">KO</button>
+      <button class="lbtn"    id="ben" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- KPI -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-icon" style="background:var(--p100)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--p600)" stroke-width="2" stroke-linecap="round"><path d="M12 2l3 7h7l-6 4 2 7-6-4-6 4 2-7-6-4h7z"/></svg>
+      </div>
+      <div><div class="kpi-num">10</div><div class="kpi-lbl" data-ko="보유 인증 총계" data-en="Total Certifications">보유 인증 총계</div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon" style="background:var(--t100)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--t600)" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </div>
+      <div><div class="kpi-num" style="color:var(--t600)">22</div><div class="kpi-lbl" data-ko="인증 보유 사업장" data-en="Certified Sites">인증 보유 사업장</div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon" style="background:var(--amb100)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amb)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+      </div>
+      <div><div class="kpi-num" style="color:var(--amb)">9</div><div class="kpi-lbl" data-ko="글로벌 커버리지 (국가)" data-en="Countries">글로벌 커버리지 (국가)</div></div>
+    </div>
+  </div>
+
+  <!-- filter -->
+  <div class="frow">
+    <button class="fbtn on" data-cat="ALL"    onclick="setFilter('ALL',this)"    data-ko="전체"   data-en="All">전체</button>
+    <button class="fbtn"    data-cat="환경"   onclick="setFilter('환경',this)"   data-ko="환경"   data-en="Environment">환경</button>
+    <button class="fbtn"    data-cat="안전"   onclick="setFilter('안전',this)"   data-ko="안전"   data-en="Safety">안전</button>
+    <button class="fbtn"    data-cat="제품"   onclick="setFilter('제품',this)"   data-ko="제품"   data-en="Product">제품</button>
+    <button class="fbtn"    data-cat="공급망" onclick="setFilter('공급망',this)" data-ko="공급망" data-en="Supply Chain">공급망</button>
+    <button class="fbtn"    data-cat="품질"   onclick="setFilter('품질',this)"   data-ko="품질"   data-en="Quality">품질</button>
+    <button class="fbtn"    data-cat="사회"   onclick="setFilter('사회',this)"   data-ko="사회"   data-en="Social">사회</button>
+    <a class="dl-link" id="dl-cert-link"
+       href="https://www.hyosungtnc.com/kr/sustainability/governance/certification/environment"
+       data-ko-href="https://www.hyosungtnc.com/kr/sustainability/governance/certification/environment"
+       data-en-href="https://www.hyosungtnc.com/en/sustainability/governance/certification/environment"
+       target="_blank" rel="noopener">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span data-ko="인증서 다운로드" data-en="Download Certificates">인증서 다운로드</span>
+    </a>
+  </div>
+
+  <!-- company -->
+  <div class="sec" id="sec-company">
+    <div class="tblk">
+      <div class="thdr">
+        <span class="tbadge bc" data-ko="사업장 인증" data-en="Site Certifications">사업장 인증</span>
+        <span class="tct" data-ko="6개 인증" data-en="6 certifications">6개 인증</span>
+      </div>
+      <div class="cgrid">
+        <div class="ccard" data-cat="환경" style="--acc:#C62828" onclick="showDetail(this,'iso14')">
+          <span class="cpill cenv" data-ko="환경" data-en="ENV">환경</span>
+          <div class="cbadge" style="background:#C62828">ISO 14001</div>
+          <div class="cnm">ISO 14001</div>
+          <div class="csc" data-ko="환경경영시스템" data-en="Environmental Mgmt System">환경경영시스템</div>
+          <div class="cst"><span data-ko="사업장" data-en="Sites">사업장</span> <em>14</em></div>
+        </div>
+        <div class="ccard" data-cat="안전" style="--acc:#6A1040" onclick="showDetail(this,'iso45')">
+          <span class="cpill csaf" data-ko="안전" data-en="SAFETY">안전</span>
+          <div class="cbadge" style="background:#6A1040">ISO 45001</div>
+          <div class="cnm">ISO 45001</div>
+          <div class="csc" data-ko="안전보건경영시스템" data-en="Occupational H&amp;S Mgmt">안전보건경영시스템</div>
+          <div class="cst"><span data-ko="사업장" data-en="Sites">사업장</span> <em>10</em></div>
+        </div>
+        <div class="ccard" data-cat="품질" style="--acc:#1565C0" onclick="showDetail(this,'iso9')">
+          <span class="cpill cqua" data-ko="품질" data-en="QUALITY">품질</span>
+          <div class="cbadge" style="background:#1565C0">ISO 9001</div>
+          <div class="cnm">ISO 9001</div>
+          <div class="csc" data-ko="품질경영시스템" data-en="Quality Mgmt System">품질경영시스템</div>
+          <div class="cst"><span data-ko="사업장" data-en="Sites">사업장</span> <em>15</em></div>
+        </div>
+        <div class="ccard" data-cat="사회" style="--acc:#00695C" onclick="showDetail(this,'family')">
+          <span class="cpill csoc" data-ko="사회" data-en="SOCIAL">사회</span>
+          <div class="cbadge" style="background:#00695C;font-size:8px" data-ko="가족친화" data-en="Family-Friendly">가족친화</div>
+          <div class="cnm" data-ko="가족친화인증" data-en="Family-Friendly Cert.">가족친화인증</div>
+          <div class="csc" data-ko="일·생활 균형 우수기업" data-en="Family-Friendly Company Certification">일·생활 균형 우수기업</div>
+          <div class="cst"><span data-ko="사업장" data-en="Sites">사업장</span> <em>1</em></div>
+        </div>
+        <div class="ccard" data-cat="공급망" style="--acc:#BF360C" onclick="showDetail(this,'zdhc')">
+          <span class="cpill csup" data-ko="공급망" data-en="SUPPLY">공급망</span>
+          <div class="cbadge" style="background:#BF360C">ZDHC</div>
+          <div class="cnm">ZDHC Level 2</div>
+          <div class="csc" data-ko="공급망 유해화학물질 관리" data-en="Supply Chain Chem. Mgmt">공급망 유해화학물질 관리</div>
+          <div class="cst"><span data-ko="사업장" data-en="Sites">사업장</span> <em>1</em></div>
+        </div>
+        <div class="ccard" data-cat="공급망" style="--acc:#1C5A3A" onclick="showDetail(this,'ecovadis')">
+          <span class="cpill csup" data-ko="공급망" data-en="SUPPLY">공급망</span>
+          <div class="cbadge" style="background:#1C5A3A">EcoVadis</div>
+          <div class="cnm">EcoVadis Rating</div>
+          <div class="csc" data-ko="지속가능경영 외부 평가등급" data-en="Sustainability Rating (External)">지속가능경영 외부 평가등급</div>
+          <div class="cst"><span data-ko="사업장" data-en="Sites">사업장</span> <em>4</em></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- textiles PU -->
+  <div class="sec" id="sec-pu">
+    <div class="tblk">
+      <div class="thdr">
+        <span class="tbadge bt" data-ko="제품·소재 인증" data-en="Product &amp; Material">제품·소재 인증</span>
+        <span class="tct" data-ko="4개 인증" data-en="4 certifications">4개 인증</span>
+      </div>
+      <div class="cgrid">
+        <div class="ccard" data-cat="제품" style="--acc:#2E7D32" onclick="showDetail(this,'grs')">
+          <span class="cpill cprd" data-ko="제품" data-en="PRODUCT">제품</span>
+          <div class="cbadge" style="background:#2E7D32">GRS v4.0</div>
+          <div class="cnm">GRS v4.0 / RCS v2.0</div>
+          <div class="csc" data-ko="재활용 원료 인증 (GRS·RCS 포함)" data-en="Recycled Standard (GRS &amp; RCS)">재활용 원료 인증 (GRS·RCS 포함)</div>
+          <div class="cst"><span data-ko="사업장" data-en="Sites">사업장</span> <em>11</em></div>
+        </div>
+        <div class="ccard" data-cat="제품" style="--acc:#1A237E" onclick="showDetail(this,'oeko')">
+          <span class="cpill cprd" data-ko="제품" data-en="PRODUCT">제품</span>
+          <div class="cbadge" style="background:#1A237E;font-size:8px">OEKO-TEX</div>
+          <div class="cnm">OEKO-TEX Std 100</div>
+          <div class="csc" data-ko="유해물질 안전 인증" data-en="Harmful Substance Safety">유해물질 안전 인증</div>
+          <div class="cst"><span data-ko="사업장" data-en="Sites">사업장</span> <em>11</em></div>
+        </div>
+        <div class="ccard" data-cat="제품" style="--acc:#003087" onclick="showDetail(this,'sgs')">
+          <span class="cpill cprd" data-ko="제품" data-en="PRODUCT">제품</span>
+          <div class="cbadge" style="background:#003087">SGS ECO</div>
+          <div class="cnm">SGS ECO PRODUCT</div>
+          <div class="csc" data-ko="바이오 스판덱스 인증" data-en="Bio-Spandex Certification">바이오 스판덱스 인증</div>
+          <div class="cst"><span data-ko="사업장" data-en="Sites">사업장</span> <em>1</em></div>
+        </div>
+        <div class="ccard" data-cat="제품" style="--acc:#2E7D32" onclick="showDetail(this,'ecolabel')">
+          <span class="cpill cprd" data-ko="제품" data-en="PRODUCT">제품</span>
+          <div class="cbadge" style="background:#2E7D32;font-size:8px" data-ko="환경표지" data-en="Eco-Label">환경표지</div>
+          <div class="cnm" data-ko="환경표지 인증" data-en="Korea Eco-Label">환경표지 인증</div>
+          <div class="csc" data-ko="재활용 원사 환경인증 (REGEN)" data-en="Eco Label — REGEN Yarn">재활용 원사 환경인증 (REGEN)</div>
+          <div class="cst"><span data-ko="사업장" data-en="Sites">사업장</span> <em>1</em></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- detail -->
+  <div id="detail" class="detail">
+    <div id="dtitle" class="dtitle"></div>
+    <div id="dsite-wrap"></div>
+  </div>
+
+  <!-- matrix -->
+  <div class="mx-sec">
+    <div class="mx-hdr">
+      <div class="mx-ttl" data-ko="사업장별 인증 취득 현황 매트릭스" data-en="Site × Certification Matrix">사업장별 인증 취득 현황 매트릭스</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+      <select id="mf-type" onchange="buildMatrix();applyHL(curCat)"
+        style="font-size:13px;padding:5px 12px;border-radius:99px;border:0.5px solid var(--bdr2);background:var(--wh);color:var(--g600);cursor:pointer;appearance:none;-webkit-appearance:none;padding-right:28px;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22><path fill=%22%239B94B8%22 d=%22M7 10l5 5 5-5z%22/></svg>');background-repeat:no-repeat;background-position:right 10px center;">
+        <option value="" data-ko="구분: 전체" data-en="Type: All">구분: 전체</option>
+        <option value="hq"     data-ko="본사"   data-en="HQ">본사</option>
+        <option value="plant"  data-ko="공장"   data-en="Plant">공장</option>
+        <option value="trade"  data-ko="무역"   data-en="Trading">무역</option>
+        <option value="office" data-ko="사무소" data-en="Office">사무소</option>
+      </select>
+      <select id="mf-country" onchange="buildMatrix();applyHL(curCat)"
+        style="font-size:13px;padding:5px 12px;border-radius:99px;border:0.5px solid var(--bdr2);background:var(--wh);color:var(--g600);cursor:pointer;appearance:none;-webkit-appearance:none;padding-right:28px;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22><path fill=%22%239B94B8%22 d=%22M7 10l5 5 5-5z%22/></svg>');background-repeat:no-repeat;background-position:right 10px center;">
+        <option value="" data-ko="국가: 전체" data-en="Country: All">국가: 전체</option>
+        <option value="한국"    data-ko="한국"    data-en="Korea">한국</option>
+        <option value="중국"    data-ko="중국"    data-en="China">중국</option>
+        <option value="베트남"  data-ko="베트남"  data-en="Vietnam">베트남</option>
+        <option value="튀르키예" data-ko="튀르키예" data-en="Türkiye">튀르키예</option>
+        <option value="이탈리아" data-ko="이탈리아" data-en="Italy">이탈리아</option>
+        <option value="일본"    data-ko="일본"    data-en="Japan">일본</option>
+        <option value="미국"    data-ko="미국"    data-en="USA">미국</option>
+        <option value="인도"    data-ko="인도"    data-en="India">인도</option>
+        <option value="브라질"  data-ko="브라질"  data-en="Brazil">브라질</option>
+      </select>
+    </div>
+    <div class="mx-wrap">
+      <div class="mx-scroll">
+        <table>
+          <thead>
+            <tr id="mhead">
+              <th data-ko="사업장" data-en="Site">사업장</th>
+              <th data-ko="구분" data-en="Type">구분</th>
+              <th data-ko="국가" data-en="Country">국가</th>
+              <th>ISO 14001</th><th>ISO 45001</th><th>ISO 9001</th>
+              <th data-ko="EcoVadis" data-en="EcoVadis">EcoVadis</th>
+              <th data-ko="가족친화" data-en="Family-Friendly">가족친화</th><th>ZDHC</th>
+              <th>GRS</th><th>OEKO-TEX</th><th>SGS ECO</th><th data-ko="환경표지" data-en="Eco-Label">환경표지</th>
+            </tr>
+          </thead>
+          <tbody id="mbody"></tbody>
+        </table>
+      </div>
+      <div class="mx-foot">
+        <span><span class="dy">●</span> <span data-ko="인증 취득" data-en="Certified">인증 취득</span></span>
+        <span><span class="dn">–</span> <span data-ko="미취득" data-en="Not certified">미취득</span></span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="foot">
+  <span data-ko="효성티앤씨 ESG경영팀 &nbsp;·&nbsp; 기준일: 2026-03-17" data-en="Hyosung TNC ESG Mgmt Team &nbsp;·&nbsp; As of: 2026-03-17">효성티앤씨 ESG경영팀 &nbsp;·&nbsp; 기준일: 2026-03-17</span>
+</footer>
+
+<script>
+const CATS = ['환경','안전','품질','공급망','사회','공급망','제품','제품','제품','제품'];
+
+// 인증별 최근접 만료일 (카드 D-day 경고용)
+const EXPIRY = {
+  grs:      '2026-04-03',
+  iso14:    '2026-05-17',
+  iso45:    '2026-05-17',
+  oeko:     '2026-04-15',
+  sgs:      null,
+  zdhc:     '2026-02-14',
+  family:   '2028-11-30',
+  iso9:     '2026-05-17',
+  ecolabel: '2029-01-04',
+  ecovadis: '2026-04-30'
+};
+
+const DATA = {
+  grs:{
+    ko:{title:'GRS v4.0 / RCS v2.0',cycle:'매년 갱신',sites:[
+      {name:'본사',expiry:'2026-11-29',cert:'both'},
+      {name:'울산공장',expiry:'2026-11-29',cert:'grs'},
+      {name:'대구공장',expiry:'2026-11-29',cert:'grs'},
+      {name:'구미공장(스판)',expiry:'2026-11-29',cert:'grs'},
+      {name:'밀라노 법인',expiry:'2026-11-29',cert:'grs'},
+      {name:'동경 법인',expiry:'2026-11-29',cert:'grs'},
+      {name:'효성 USA',expiry:'2026-11-29',cert:'grs'},
+      {name:'튀르키예스판',expiry:'2026-10-29',cert:'rcs'},
+      {name:'동나이',expiry:'2027-03-16',cert:'grs'},
+      {name:'동나이나일론',expiry:'2026-12-28',cert:'grs'},
+      {name:'인도스판',expiry:'2026-04-03',cert:'rcs'}
+    ]},
+    en:{title:'GRS v4.0 / RCS v2.0',cycle:'Annual renewal',sites:[
+      {name:'Hyosung TNC',expiry:'2026-11-29',cert:'both'},
+      {name:'Hyosung TNC - Ulsan Plant',expiry:'2026-11-29',cert:'grs'},
+      {name:'Hyosung TNC - Daegu Plant',expiry:'2026-11-29',cert:'grs'},
+      {name:'Hyosung TNC - Gumi Plant (Spandex)',expiry:'2026-11-29',cert:'grs'},
+      {name:'Hyosung Europe S.R.L.',expiry:'2026-11-29',cert:'grs'},
+      {name:'Hyosung Japan Co., Ltd.',expiry:'2026-11-29',cert:'grs'},
+      {name:'Hyosung USA INC.',expiry:'2026-11-29',cert:'grs'},
+      {name:'Hyosung Istanbul Tekstil Ltd. Sti.',expiry:'2026-10-29',cert:'rcs'},
+      {name:'Hyosung Dong Nai Co., Ltd.',expiry:'2027-03-16',cert:'grs'},
+      {name:'Hyosung Dong Nai Nylon Company Limited',expiry:'2026-12-28',cert:'grs'},
+      {name:'Hyosung India Private Limited',expiry:'2026-04-03',cert:'rcs'}
+    ]}
+  },
+  iso14:{
+    ko:{title:'ISO 14001',cycle:'3년 주기',sites:[
+      {name:'본사 (공덕 사무소 포함)',expiry:'2028-03-08'},
+      {name:'울산공장',expiry:'2028-03-08'},
+      {name:'구미공장(스판)',expiry:'2028-03-23'},
+      {name:'구미공장(나폴리)',expiry:'2028-03-08'},
+      {name:'대구영업소',expiry:'2028-03-08'},
+      {name:'안양연구소',expiry:'2028-03-08'},
+      {name:'가흥화공',expiry:'2028-05-12'},
+      {name:'인도스판',expiry:'2028-10-15'},
+      {name:'가흥스판',expiry:'2026-11-08'},
+      {name:'취저우NF3',expiry:'2026-05-17'},
+      {name:'닝샤스판',expiry:'2028-06-25'},
+      {name:'튀르키예스판',expiry:'2026-08-11'},
+      {name:'동나이',expiry:'2026-11-06'},
+      {name:'동나이나일론',expiry:'2026-11-06'}
+    ]},
+    en:{title:'ISO 14001',cycle:'3-year cycle',sites:[
+      {name:'Hyosung TNC (incl. Gongdeok Office)',expiry:'2028-03-08'},
+      {name:'Hyosung TNC - Ulsan Plant',expiry:'2028-03-08'},
+      {name:'Hyosung TNC - Gumi Plant (Spandex)',expiry:'2028-03-23'},
+      {name:'Hyosung TNC - Gumi Plant (Nylon)',expiry:'2028-03-08'},
+      {name:'Hyosung TNC - Daegu Office',expiry:'2028-03-08'},
+      {name:'Hyosung TNC - Anyang R&D Center',expiry:'2028-03-08'},
+      {name:'Hyosung Chemicals (Jiaxing) Co., Ltd.',expiry:'2028-05-12'},
+      {name:'Hyosung India Private Limited',expiry:'2028-10-15'},
+      {name:'Hyosung Spandex (Jiaxing) Co., Ltd.',expiry:'2026-11-08'},
+      {name:'Hyosung New Material & High Technology (Quzhou) Co., Ltd.',expiry:'2026-05-17'},
+      {name:'Hyosung Spandex (Ningxia) Co., Ltd.',expiry:'2028-06-25'},
+      {name:'Hyosung Istanbul TEKSTIL LTD.STI',expiry:'2026-08-11'},
+      {name:'Hyosung Dong Nai Co., Ltd.',expiry:'2026-11-06'},
+      {name:'Hyosung Dong Nai Nylon Company Limited',expiry:'2026-11-06'}
+    ]}
+  },
+  iso45:{
+    ko:{title:'ISO 45001',cycle:'3년 주기',sites:[
+      {name:'가흥화공',expiry:'2028-05-12'},
+      {name:'가흥스판',expiry:'2026-11-08'},
+      {name:'구미공장(스판)',expiry:'2028-03-17'},
+      {name:'구미공장(나폴리)',expiry:'2028-03-16'},
+      {name:'울산공장',expiry:'2028-03-16'},
+      {name:'취저우NF3',expiry:'2026-05-17'},
+      {name:'닝샤스판',expiry:'2028-06-25'},
+      {name:'튀르키예스판',expiry:'2026-08-11'},
+      {name:'동나이',expiry:'2028-03-06'},
+      {name:'동나이나일론',expiry:'2028-03-06'}
+    ]},
+    en:{title:'ISO 45001',cycle:'3-year cycle',sites:[
+      {name:'Hyosung Chemicals (Jiaxing) Co., Ltd.',expiry:'2028-05-12'},
+      {name:'Hyosung Spandex (Jiaxing) Co., Ltd.',expiry:'2026-11-08'},
+      {name:'Hyosung TNC - Gumi Plant (Spandex)',expiry:'2028-03-17'},
+      {name:'Hyosung TNC - Gumi Plant (Nylon)',expiry:'2028-03-16'},
+      {name:'Hyosung TNC - Ulsan Plant',expiry:'2028-03-16'},
+      {name:'Hyosung New Material & High Technology (Quzhou) Co., Ltd.',expiry:'2026-05-17'},
+      {name:'Hyosung Spandex (Ningxia) Co., Ltd.',expiry:'2028-06-25'},
+      {name:'Hyosung Istanbul TEKSTIL LTD.STI',expiry:'2026-08-11'},
+      {name:'Hyosung Dong Nai Co., Ltd.',expiry:'2028-03-06'},
+      {name:'Hyosung Dong Nai Nylon Company Limited',expiry:'2028-03-06'}
+    ]}
+  },
+  oeko:{
+    ko:{title:'OEKO-TEX Standard 100',cycle:'매년 갱신',sites:[
+      {name:'본사',expiry:'2026-04-15'},
+      {name:'대구공장',expiry:'2027-01-31'},
+      {name:'주해스판 (일반)',expiry:'2027-03-31'},
+      {name:'주해스판 (재생)',expiry:'2027-03-15'},
+      {name:'인도스판',expiry:'2027-02-28'},
+      {name:'광동스판 (재생)',expiry:'2026-11-30'},
+      {name:'광동스판 (일반)',expiry:'2026-11-15'},
+      {name:'닝샤스판',expiry:'2026-01-31'},
+      {name:'취저우스판',expiry:'2026-06-15'},
+      {name:'튀르키예스판 (재생)',expiry:'2027-02-28'},
+      {name:'튀르키예스판 (일반)',expiry:'2026-08-31'},
+      {name:'동나이 (재생)',expiry:'2026-12-31'},
+      {name:'동나이 (일반)',expiry:'2026-11-25'},
+      {name:'동나이나일론 (재생)',expiry:'2026-04-16'},
+      {name:'동나이나일론 (일반)',expiry:'2026-11-16'},
+      {name:'브라질스판',expiry:'2027-01-31'}
+    ]},
+    en:{title:'OEKO-TEX Standard 100',cycle:'Annual renewal',sites:[
+      {name:'Hyosung TNC',expiry:'2026-04-15'},
+      {name:'Hyosung TNC - Daegu Plant',expiry:'2027-01-31'},
+      {name:'Hyosung Spandex (Zhuhai) Co., Ltd. (Original)',expiry:'2027-03-31'},
+      {name:'Hyosung Spandex (Zhuhai) Co., Ltd. (Recycled)',expiry:'2027-03-15'},
+      {name:'Hyosung India Private Limited',expiry:'2027-02-28'},
+      {name:'Hyosung Spandex (Guangdong) Co., Ltd. (Recycled)',expiry:'2026-11-30'},
+      {name:'Hyosung Spandex (Guangdong) Co., Ltd. (Original)',expiry:'2026-11-15'},
+      {name:'Hyosung Spandex (Ningxia) Co., Ltd.',expiry:'2026-01-31'},
+      {name:'Hyosung Spandex (Quzhou) Co., Ltd.',expiry:'2026-06-15'},
+      {name:'Hyosung Istanbul Tekstil Ltd. Sti. (Recycled)',expiry:'2027-02-28'},
+      {name:'Hyosung Istanbul Tekstil Ltd. Sti. (Original)',expiry:'2026-08-31'},
+      {name:'Hyosung Dong Nai Co., Ltd. (Recycled)',expiry:'2026-12-31'},
+      {name:'Hyosung Dong Nai Co., Ltd. (Original)',expiry:'2026-11-25'},
+      {name:'Hyosung Dong Nai Nylon Company Limited (Recycled)',expiry:'2026-04-16'},
+      {name:'Hyosung Dong Nai Nylon Company Limited (Original)',expiry:'2026-11-16'},
+      {name:'Hyosung Brasil Indústria e Comércio de Fibras Ltda.',expiry:'2027-01-31'}
+    ]}
+  },
+  sgs:{
+    ko:{title:'SGS ECO PRODUCT',cycle:'매년 갱신',sites:[
+      {name:'본사 (리젠 바이오 스판덱스)',expiry:null}
+    ]},
+    en:{title:'SGS ECO PRODUCT',cycle:'Annual renewal',sites:[
+      {name:'Hyosung TNC — Regen Bio-Spandex',expiry:null}
+    ]}
+  },
+  zdhc:{
+    ko:{title:'ZDHC Supplier to Zero Level 2',cycle:'매년 갱신 (2026년 10월 이후 갱신 예정 — ZDHC 2026 버전 업데이트 대응)',sites:[
+      {name:'대구공장',expiry:'2026-02-14'}
+    ]},
+    en:{title:'ZDHC Supplier to Zero Level 2',cycle:'Annual renewal (Renewal planned after Oct 2026 — pending ZDHC 2026 version update)',sites:[
+      {name:'Hyosung TNC - Daegu Plant',expiry:'2026-02-14'}
+    ]}
+  },
+  family:{
+    ko:{title:'가족친화인증',cycle:'3년 주기',sites:[
+      {name:'본사',expiry:'2028-11-30'}
+    ]},
+    en:{title:'Family-Friendly Company Certification',cycle:'3-year cycle',sites:[
+      {name:'Hyosung TNC',expiry:'2028-11-30'}
+    ]}
+  },
+  iso9:{
+    ko:{title:'ISO 9001',cycle:'3년 주기',sites:[
+      {name:'본사',expiry:'2028-03-08'},
+      {name:'울산공장',expiry:'2028-03-08'},
+      {name:'구미공장(스판)',expiry:'2028-03-16'},
+      {name:'구미공장(나폴리)',expiry:'2028-03-08'},
+      {name:'대구영업소',expiry:'2028-03-08'},
+      {name:'안양연구소',expiry:'2028-03-08'},
+      {name:'가흥화공',expiry:'2028-01-28'},
+      {name:'인도스판',expiry:'2028-10-15'},
+      {name:'가흥스판',expiry:'2027-03-27'},
+      {name:'취저우NF3',expiry:'2026-05-17'},
+      {name:'주해스판',expiry:'2027-05-26'},
+      {name:'닝샤스판',expiry:'2028-06-25'},
+      {name:'튀르키예스판',expiry:'2028-03-17'},
+      {name:'동나이',expiry:'2026-11-06'},
+      {name:'동나이나일론',expiry:'2026-11-06'}
+    ]},
+    en:{title:'ISO 9001',cycle:'3-year cycle',sites:[
+      {name:'Hyosung TNC',expiry:'2028-03-08'},
+      {name:'Hyosung TNC - Ulsan Plant',expiry:'2028-03-08'},
+      {name:'Hyosung TNC - Gumi Plant (Spandex)',expiry:'2028-03-16'},
+      {name:'Hyosung TNC - Gumi Plant (Nylon)',expiry:'2028-03-08'},
+      {name:'Hyosung TNC - Daegu Office',expiry:'2028-03-08'},
+      {name:'Hyosung TNC - Anyang R&D Center',expiry:'2028-03-08'},
+      {name:'Hyosung Chemicals (Jiaxing) Co., Ltd.',expiry:'2028-01-28'},
+      {name:'Hyosung India Private Limited',expiry:'2028-10-15'},
+      {name:'Hyosung Spandex (Jiaxing) Co., Ltd.',expiry:'2027-03-27'},
+      {name:'Hyosung New Material & High Technology (Quzhou) Co., Ltd.',expiry:'2026-05-17'},
+      {name:'Hyosung Spandex (Zhuhai) Co., Ltd.',expiry:'2027-05-26'},
+      {name:'Hyosung Spandex (Ningxia) Co., Ltd.',expiry:'2028-06-25'},
+      {name:'Hyosung Istanbul TEKSTIL LTD.STI',expiry:'2028-03-17'},
+      {name:'Hyosung Dong Nai Co., Ltd.',expiry:'2026-11-06'},
+      {name:'Hyosung Dong Nai Nylon Company Limited',expiry:'2026-11-06'}
+    ]}
+  },
+  ecolabel:{
+    ko:{title:'환경표지 인증',cycle:'3년 주기',sites:[
+      {name:'구미공장(나폴리)',expiry:'2029-01-04'}
+    ]},
+    en:{title:'Korea Eco-Label Certification',cycle:'3-year cycle',sites:[
+      {name:'Hyosung TNC - Gumi Plant (Nylon)',expiry:'2029-01-04'}
+    ]}
+  },
+  ecovadis:{
+    ko:{title:'EcoVadis 지속가능경영 평가등급',cycle:'매년 갱신',sites:[
+      {name:'본사',              grade:'bronze',    score:64, period:'2026-01'},
+      {name:'동나이',            grade:'silver',    score:73, period:'2026-02'},
+      {name:'가흥스판',          grade:'bronze',    score:61, period:'2025-04'},
+      {name:'가흥화공',          grade:'committed', score:48, period:'2025-10'}
+    ]},
+    en:{title:'EcoVadis Sustainability Rating',cycle:'Annual renewal',sites:[
+      {name:'Hyosung TNC',                                  grade:'bronze',    score:64, period:'2026-01'},
+      {name:'Hyosung Dong Nai Co., Ltd.',                   grade:'silver',    score:73, period:'2026-02'},
+      {name:'Hyosung Spandex (Jiaxing) Co., Ltd.',          grade:'bronze',    score:61, period:'2025-04'},
+      {name:'Hyosung Chemicals (Jiaxing) Co., Ltd.',        grade:'committed', score:48, period:'2025-10'}
+    ]}
+  }
+};
+
+const MATRIX = [
+  // ── 본사 ──────────────────────────────────────────────────────────────
+  ['본사',             'Hyosung TNC',                                               '한국','Korea',    [1,0,1,'bronze',1,0,1,1,1,0], 'hq'],
+  // ── 생산공장 ──────────────────────────────────────────────────────────
+  ['구미공장 (스판)',   'Hyosung TNC - Gumi Plant (Spandex)',                        '한국','Korea',    [1,1,1,0,0,0,1,0,0,0], 'plant'],
+  ['구미공장 (나폴리)','Hyosung TNC - Gumi Plant (Nylon)',                           '한국','Korea',    [1,1,1,0,0,0,0,0,0,1], 'plant'],
+  ['울산공장',         'Hyosung TNC - Ulsan Plant',                                  '한국','Korea',    [1,1,1,0,0,0,1,0,0,0], 'plant'],
+  ['대구공장',         'Hyosung TNC - Daegu Plant',                                  '한국','Korea',    [0,0,0,0,0,1,1,1,0,0], 'plant'],
+  ['가흥화공',         'Hyosung Chemicals (Jiaxing) Co., Ltd.',                      '중국','China',    [1,1,1,'committed',0,0,0,0,0,0], 'plant'],
+  ['가흥스판',         'Hyosung Spandex (Jiaxing) Co., Ltd.',                        '중국','China',    [1,1,1,'bronze',0,0,0,0,0,0], 'plant'],
+  ['취저우NF3',        'Hyosung New Material & High Technology (Quzhou) Co., Ltd.',            '중국','China',    [1,1,1,0,0,0,0,0,0,0], 'plant'],
+  ['취저우스판',        'Hyosung Spandex (Quzhou) Co., Ltd.',                                  '중국','China',    [0,0,0,0,0,0,0,1,0,0], 'plant'],
+  ['튀르키예스판',     'Hyosung Istanbul TEKSTIL LTD.STI',                           '튀르키예','Türkiye',[1,1,1,0,0,0,1,1,0,0], 'plant'],
+  ['동나이',           'Hyosung Dong Nai Co., Ltd.',                                 '베트남','Vietnam', [1,1,1,'silver',0,0,1,1,0,0], 'plant'],
+  ['동나이나일론',       'Hyosung Dong Nai Nylon Company Limited',                     '베트남','Vietnam', [1,1,1,0,0,0,1,1,0,0], 'plant'],
+  ['주해스판',         'Hyosung Spandex (Zhuhai) Co., Ltd.',                         '중국','China',    [0,0,1,0,0,0,0,1,0,0], 'plant'],
+  ['닝샤스판',         'Hyosung Spandex (Ningxia) Co., Ltd.',                        '중국','China',    [1,1,1,0,0,0,0,1,0,0], 'plant'],
+  ['인도스판',         'Hyosung India Private Limited',                                    '인도','India',    [1,0,1,0,0,0,1,1,0,0], 'plant'],
+  ['광동스판',         'Hyosung Spandex (Guangdong) Co., Ltd.',                        '중국','China',    [0,0,0,0,0,0,0,1,0,0], 'plant'],
+  // ── 무역법인 ──────────────────────────────────────────────────────────
+  ['브라질스판',       'Hyosung Brasil Indústria e Comércio de Fibras Ltda.',               '브라질','Brazil',  [0,0,0,0,0,0,0,1,0,0], 'plant'],
+  ['밀라노 법인',      'Hyosung Europe S.R.L.',                                             '이탈리아','Italy', [0,0,0,0,0,0,1,0,0,0], 'trade'],
+  ['동경 법인',        'Hyosung Japan Co., Ltd.',                                              '일본','Japan',    [0,0,0,0,0,0,1,0,0,0], 'trade'],
+  ['효성 USA',         'Hyosung USA INC.',                                                '미국','USA',      [0,0,0,0,0,0,1,0,0,0], 'trade'],
+  // ── 영업사무소 ────────────────────────────────────────────────────────
+  ['대구영업소',       'Hyosung TNC - Daegu Office',                              '한국','Korea',    [1,0,1,0,0,0,0,0,0,0], 'office'],
+  // ── 연구소 ────────────────────────────────────────────────────────────
+  ['안양연구소',       'Hyosung TNC - Anyang R&D Center',                            '한국','Korea',    [1,0,1,0,0,0,0,0,0,0], 'rd'],
+];
+
+let lang='ko', activeCard=null, curCat='ALL';
+
+function setLang(l){
+  lang=l;
+  document.getElementById('bko').classList.toggle('on',l==='ko');
+  document.getElementById('ben').classList.toggle('on',l==='en');
+  document.querySelectorAll('[data-ko]').forEach(el=>{
+    if(el.dataset[l]) el.innerHTML=el.dataset[l];
+  });
+  const dlLink=document.getElementById('dl-cert-link');
+  if(dlLink) dlLink.href=dlLink.dataset[l+'Href']||dlLink.href;
+  buildMatrix();
+  initDday();
+  applyHL(curCat);
+}
+
+function buildMatrix(){
+  const tb=document.getElementById('mbody');
+  tb.innerHTML='';
+  const TLBL={
+    ko:{plant:'공장',trade:'무역',hq:'본사',office:'사무소',rd:'사무소'},
+    en:{plant:'Plant',trade:'Trading',hq:'HQ',office:'Office',rd:'Office'}
+  };
+  const fType    = document.getElementById('mf-type')?.value    || '';
+  const fCountry = document.getElementById('mf-country')?.value || '';
+
+  MATRIX.forEach(r=>{
+    const [sKo,sEn,cKo,cEn,certs,type]=r;
+    if(fType    && type!==fType)  return;
+    if(fCountry && cKo!==fCountry) return;
+    const lbl=TLBL[lang][type]||'';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${lang==='ko'?sKo:sEn}</td>`
+      +`<td>${lbl}</td>`
+      +`<td>${lang==='ko'?cKo:cEn}</td>`
+      +certs.map((v,ci)=>`<td class="cc" data-ci="${ci}">${v?'<span class="dy">●</span>':'<span class="dn">–</span>'}</td>`).join('');
+    tb.appendChild(tr);
+  });
+}
+buildMatrix();
+
+function initDday(){
+  const today=new Date(); today.setHours(0,0,0,0);
+  document.querySelectorAll('.ccard').forEach(card=>{
+    const m=card.getAttribute('onclick').match(/showDetail\(this,'(\w+)'\)/);
+    if(!m) return;
+    const key=m[1];
+    const exp=EXPIRY[key];
+    if(!exp) return;
+    const expDate=new Date(exp); expDate.setHours(0,0,0,0);
+    const diff=Math.round((expDate-today)/(1000*60*60*24));
+    const old=card.querySelector('.cdday');
+    if(old) old.remove();
+    const div=document.createElement('div');
+    if(diff<=0){
+      div.className='cdday cdday-exp';
+      div.textContent=lang==='ko'?`만료 (D+${Math.abs(diff)})`:`Expired (D+${Math.abs(diff)})`;
+    } else if(diff<=90){
+      div.className='cdday cdday-warn';
+      div.textContent=`D-${diff}`;
+    } else return;
+    card.appendChild(div);
+  });
+}
+initDday();
+
+function showDetail(card,key){
+  const panel=document.getElementById('detail');
+  if(activeCard===card){card.classList.remove('on');panel.classList.remove('vis');activeCard=null;return;}
+  if(activeCard)activeCard.classList.remove('on');
+  card.classList.add('on');activeCard=card;
+  const d=DATA[key][lang];
+  const today=new Date();today.setHours(0,0,0,0);
+
+  // 타이틀 + 갱신 주기 배지
+  document.getElementById('dtitle').innerHTML=
+    `${d.title}<span class="dcycle">${d.cycle}</span>`;
+
+  // EcoVadis 전용 패널
+  if(key==='ecovadis'){
+    const siteLbl=lang==='ko'?'적용 사업장':'Sites Covered';
+    const gradeLbl=lang==='ko'?'등급':'Grade';
+    const scoreLbl=lang==='ko'?'스코어':'Score';
+    const periodLbl=lang==='ko'?'평가기준월':'Assessment';
+    const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const GCFG={
+      bronze:   {lbl:'Bronze',   bg:'#FEF3DC',clr:'#7B4A00',dot:'#CD7F32'},
+      silver:   {lbl:'Silver',   bg:'#F0EFF4',clr:'#4A4560',dot:'#9B9B9B'},
+      gold:     {lbl:'Gold',     bg:'#FFF8E1',clr:'#7B5600',dot:'#CFB53B'},
+      platinum: {lbl:'Platinum', bg:'#E3F2FD',clr:'#0D47A1',dot:'#6C9EC4'},
+      committed:{lbl:'Committed',bg:'#E8F5EE',clr:'#1A5C35',dot:'#3DAE6E'}
+    };
+    function fmtPeriod(p){
+      if(!p)return'–';
+      const[yr,mo]=p.split('-');
+      return lang==='en'?`${MONTHS[+mo-1]} ${yr}`:`${yr}.${mo}`;
+    }
+    let rows='';
+    d.sites.forEach(s=>{
+      const gc=GCFG[s.grade]||GCFG.committed;
+      const badge=`<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:5px;background:${gc.bg};color:${gc.clr}"><span style="width:8px;height:8px;border-radius:50%;background:${gc.dot};display:inline-block;flex-shrink:0"></span>${gc.lbl}</span>`;
+      rows+=`<tr><td>${s.name}</td><td>${badge}</td><td style="font-weight:700;color:var(--p600)">${s.score}/100</td><td style="color:var(--g400)">${fmtPeriod(s.period)}</td></tr>`;
+    });
+    document.getElementById('dsite-wrap').innerHTML=
+      `<table class="dsite-tbl"><thead><tr>`+
+      `<th style="width:42%">${siteLbl}</th>`+
+      `<th style="width:26%">${gradeLbl}</th>`+
+      `<th style="width:16%">${scoreLbl}</th>`+
+      `<th style="width:16%">${periodLbl}</th>`+
+      `</tr></thead><tbody>${rows}</tbody></table>`;
+    panel.classList.add('vis');
+    setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'nearest'}),60);
+    return;
+  }
+
+  // 사업장 × 만료일 테이블
+  const siteLbl=lang==='ko'?'적용 사업장':'Sites Covered';
+  const expLbl =lang==='ko'?'만료일':'Expiry';
+  const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function fmtDate(d){
+    if(!d) return '–';
+    if(lang==='en'){const p=d.split('-');return p[2]+' '+MONTHS[+p[1]-1]+' '+p[0];}
+    return d;
+  }
+  const CERT_CFG={
+    grs: {ko:'GRS only',en:'GRS only',bg:'#E8F5EE',clr:'#2A7D4F'},
+    rcs: {ko:'RCS only',en:'RCS only',bg:'#E3F2FD',clr:'#1565C0'},
+    both:{ko:'GRS + RCS',en:'GRS + RCS',bg:'#EDE5FF',clr:'#2E008B'}
+  };
+  function certBadge(cert){
+    if(!cert) return '';
+    const c=CERT_CFG[cert]; if(!c) return '';
+    const lbl=c[lang]||c.en;
+    return `<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;background:${c.bg};color:${c.clr};margin-left:8px;letter-spacing:.03em;vertical-align:middle">${lbl}</span>`;
+  }
+  let rows='';
+  d.sites.forEach(s=>{
+    const nm=s.name;
+    const exp=s.expiry;
+    let cls='', expStr=fmtDate(exp);
+    if(exp){
+      const expDate=new Date(exp);expDate.setHours(0,0,0,0);
+      const diff=Math.round((expDate-today)/(1000*60*60*24));
+      if(diff<=0) cls='exp-past';
+      else if(diff<=90) cls='exp-warn';
+    }
+    rows+=`<tr class="${cls}"><td>${nm}${certBadge(s.cert)}</td><td>${expStr}</td></tr>`;
+  });
+  document.getElementById('dsite-wrap').innerHTML=
+    `<table class="dsite-tbl"><thead><tr><th>${siteLbl}</th><th>${expLbl}</th></tr></thead>`+
+    `<tbody>${rows}</tbody></table>`;
+
+  panel.classList.add('vis');
+  setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'nearest'}),60);
+}
+
+function setFilter(cat,btn){
+  curCat=cat;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(activeCard){activeCard.classList.remove('on');activeCard=null;}
+  document.getElementById('detail').classList.remove('vis');
+  document.querySelectorAll('.ccard').forEach(c=>{
+    c.classList.toggle('hidden',cat!=='ALL'&&c.dataset.cat!==cat);
+  });
+  ['company','pu'].forEach(id=>{
+    const s=document.getElementById('sec-'+id);
+    s.classList.toggle('hidden',s.querySelectorAll('.ccard:not(.hidden)').length===0);
+  });
+  applyHL(cat);
+}
+
+function applyHL(cat){
+  const ths=document.querySelectorAll('#mhead th');
+  const tds=document.querySelectorAll('#mbody .cc');
+  if(cat==='ALL'){
+    ths.forEach(t=>t.classList.remove('con','coff'));
+    tds.forEach(t=>t.classList.remove('con','coff'));
+    return;
+  }
+  ths.forEach((th,i)=>{
+    if(i<3)return;
+    const m=CATS[i-3]===cat;
+    th.classList.toggle('con',m);th.classList.toggle('coff',!m);
+  });
+  tds.forEach(td=>{
+    const m=CATS[+td.dataset.ci]===cat;
+    td.classList.toggle('con',m);td.classList.toggle('coff',!m);
+  });
+}
+</script>
+</body>
+</html>
